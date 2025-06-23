@@ -20,6 +20,7 @@ import type { IAnimatorControllerAdapter } from '../types/adapter'
 import { AnimatorStateMachineGraph } from './graph'
 import { State } from './state'
 import { Transition } from './transition'
+import { defaultI18n } from '../i18n'
 
 export class AnimatorControllerStore {
   editingAnimator: IAnimatorComponent | null = null
@@ -348,18 +349,18 @@ export class AnimatorControllerStore {
     return {
       items: [
         {
-          label: this.adapter.i18n.t('animation.animator-controller.state.name'),
+          label: defaultI18n.t('animation.animator-controller.state.name'),
           property: 'name',
           type: 'Input',
         },
         {
-          label: this.adapter.i18n.t('animation.animator-controller.state.clip'),
+          label: defaultI18n.t('animation.animator-controller.state.clip'),
           property: 'clip',
           type: 'AssetPicker',
           assetType: 'AnimationClip',
         },
         {
-          label: this.adapter.i18n.t('animation.animator-controller.state.speed'),
+          label: defaultI18n.t('animation.animator-controller.state.speed'),
           property: 'speed',
           type: 'Number',
           dragStep: 0.1,
@@ -374,27 +375,27 @@ export class AnimatorControllerStore {
     return {
       items: [
         {
-          label: this.adapter.i18n.t('animation.animator-controller.transition.solo'),
+          label: defaultI18n.t('animation.animator-controller.transition.solo'),
           property: 'solo',
           type: 'Boolean',
         },
         {
-          label: this.adapter.i18n.t('animation.animator-controller.transition.mute'),
+          label: defaultI18n.t('animation.animator-controller.transition.mute'),
           property: 'mute',
           type: 'Boolean',
         },
         {
-          label: this.adapter.i18n.t('animation.animator-controller.transition.has-exit-time'),
+          label: defaultI18n.t('animation.animator-controller.transition.has-exit-time'),
           property: 'hasExitTime',
           type: 'Boolean',
         },
         {
-          label: this.adapter.i18n.t('animation.animator-controller.transition.fixed-duration'),
+          label: defaultI18n.t('animation.animator-controller.transition.fixed-duration'),
           property: 'isFixedDuration',
           type: 'Boolean',
         },
         {
-          label: `${this.adapter.i18n.t('animation.animator-controller.transition.duration')}(${selectedData?.isFixedDuration ? 's' : '%'})`,
+          label: `${defaultI18n.t('animation.animator-controller.transition.duration')}(${selectedData?.isFixedDuration ? 's' : '%'})`,
           property: 'duration',
           type: 'Number',
           min: 0,
@@ -437,7 +438,7 @@ export class AnimatorControllerStore {
       if (state && state.id !== this.selectedState.id) {
         value = this._makeUniqueStateName(value)
         // Show error toast through adapter
-        this.adapter.i18n.t('animation.animator-controller.state.validation.must-be-unique')
+        defaultI18n.t('animation.animator-controller.state.validation.must-be-unique')
       }
       this._statesNameMap[value] = this.selectedState
     }

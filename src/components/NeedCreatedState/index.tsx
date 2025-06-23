@@ -1,7 +1,11 @@
 import { useMemo, useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import { Flex, Button, Text, styled } from '@galacean/editor-ui'
+import { IconSquareRounded } from '@tabler/icons-react'
+
 import type { IAnimatorControllerAdapter } from '../../types/adapter'
 import type { IEntityModel, IAnimatorComponent, IAnimatorControllerAsset } from '../../types/animator'
+import { defaultI18n } from '../../i18n'
 
 interface NeedCreatedStateProps {
   adapter: IAnimatorControllerAdapter
@@ -15,21 +19,22 @@ interface NeedCreatedStateProps {
 }
 
 function NeedCreatedStateComponent(props: NeedCreatedStateProps) {
-  const { 
+  const {
     adapter,
-    targetEntity, 
-    clipAsset, 
-    animator, 
-    animatorController, 
-    needAddClip = true, 
-    onCreating, 
-    onCreated 
+    targetEntity,
+    clipAsset,
+    animator,
+    animatorController,
+    needAddClip = true,
+    onCreating,
+    onCreated,
   } = props
-  
+
   const [creating, setCreating] = useState<boolean>(false)
-  const { uiComponents, i18n } = adapter
-  const { Flex, Button, Text, styled, icons } = uiComponents
-  
+  const {} = adapter
+  // 直接使用本地i18n
+  const i18n = defaultI18n
+
   // 创建样式化组件
   const StyledContent = styled(Flex, {
     height: '100%',
@@ -48,23 +53,25 @@ function NeedCreatedStateComponent(props: NeedCreatedStateProps) {
 
   const createAnimatorAndState = async () => {
     if (!targetEntity) return
-    
+
     setCreating(true)
     onCreating?.()
-    
+
     try {
       // Get asset store from adapter
       const rootState = adapter.stateManager.getState()
       const assetStore = rootState?.assetStore
-      
-      let newAnimator: IAnimatorComponent = animator || 
-        (await targetEntity.addEditorComponent({ class: 'Animator', refId: null }, true)) as IAnimatorComponent
 
-      let newAnimatorController = animatorController || 
-        (await assetStore?.createAssetByAdd({
+      let newAnimator: IAnimatorComponent =
+        animator ||
+        ((await targetEntity.addEditorComponent({ class: 'Animator', refId: null }, true)) as IAnimatorComponent)
+
+      let newAnimatorController =
+        animatorController ||
+        ((await assetStore?.createAssetByAdd({
           assetType: 'AnimatorController',
           name: `${entityName}`,
-        })) as IAnimatorControllerAsset
+        })) as IAnimatorControllerAsset)
 
       if (needAddClip) {
         if (newAnimatorController.isSubAsset) {
@@ -73,20 +80,20 @@ function NeedCreatedStateComponent(props: NeedCreatedStateProps) {
             name: `${entityName}`,
           })) as IAnimatorControllerAsset
         }
-        
+
         let clip: any = clipAsset
         if (!clip) {
           clip = await assetStore?.createAssetByAdd({
             assetType: 'AnimationClip',
           })
         }
-        
+
         ;(newAnimatorController as any).addStateByClip(clip, 0)
       }
-      
+
       newAnimator.animatorController = (newAnimatorController as any).getCurrentRef()
       newAnimator.triggerPropertyChange('animatorController')
-      
+
       onCreated?.()
     } catch (error) {
       console.error('Failed to create animator and state:', error)
@@ -108,12 +115,12 @@ function NeedCreatedStateComponent(props: NeedCreatedStateProps) {
   const btnText = !animator
     ? i18n.t('animation.clip.create')
     : !animatorController
-    ? i18n.t('animation.clip.create-animator-controller')
-    : `${i18n.t('animation.clip.add-target')} ${targetClipName}`
+      ? i18n.t('animation.clip.create-animator-controller')
+      : `${i18n.t('animation.clip.add-target')} ${targetClipName}`
 
   return (
-    <StyledContent direction="column" align="both" gap="xs">
-      <icons.SquareRounded />
+    <StyledContent direction="column" align="both" gap="xs" data-testid="need-created-state">
+      <IconSquareRounded />
       <Text secondary size={1}>
         {tipText}
       </Text>
@@ -123,7 +130,7 @@ function NeedCreatedStateComponent(props: NeedCreatedStateProps) {
         size="sm"
         variant="secondary"
         onClick={createAnimatorAndState}
-      >
+        data-testid="create-animator-button">
         {btnText}
       </Button>
     </StyledContent>

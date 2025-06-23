@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite'
 import type { IAnimatorControllerAdapter } from '../../types/adapter'
 import type { AnimatorControllerStore } from '../../stores/AnimatorControllerStore'
 import { ScriptAssetPicker } from './ScriptAssetPicker'
+import { defaultI18n } from '../../i18n'
 
 interface StateInspectorProps {
   adapter: IAnimatorControllerAdapter
@@ -10,10 +11,12 @@ interface StateInspectorProps {
 }
 
 export const StateInspector = observer<StateInspectorProps>(({ adapter, store }) => {
-  const { uiComponents, i18n } = adapter
+  const { uiComponents } = adapter
+  // 直接使用本地i18n
+  const i18n = defaultI18n
   const { Button, Flex, styled, icons } = uiComponents
   const state = store.selectedState
-  
+
   if (!state) {
     return null
   }
@@ -82,20 +85,19 @@ export const StateInspector = observer<StateInspectorProps>(({ adapter, store })
                 onClick={() => {
                   // TODO: Open asset picker
                   console.log('Open asset picker for', item.assetType)
-                }}
-              >
+                }}>
                 {(model as any)[item.property]?.name || i18n.t('common.select')}
               </button>
             </div>
           )}
         </FormGroup>
       ))}
-      
+
       {/* Scripts section */}
       {scripts.map((_, index) => (
         <ScriptAssetPicker key={index} adapter={adapter} store={store} index={index} />
       ))}
-      
+
       <Flex align="h" css={{ margin: 'var(--space-4) auto' }}>
         <Button
           size="sm"
@@ -104,8 +106,7 @@ export const StateInspector = observer<StateInspectorProps>(({ adapter, store })
           startSlot={<icons.Plus />}
           onClick={() => {
             store.addStateMachineScript('')
-          }}
-        >
+          }}>
           {i18n.t('inspector.add-statemachine-script')}
         </Button>
       </Flex>

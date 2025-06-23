@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
+import { Flex, styled } from '@galacean/editor-ui'
 
 import type { IAnimatorControllerAdapter } from '../../types/adapter'
 import { AnimatorControllerEditorState } from '../../types/animator'
@@ -7,6 +8,7 @@ import { useAnimatorControllerStore } from '../../hooks/useAnimatorControllerSto
 import { LeftSide } from '../LeftSide'
 import { RightSide } from '../RightSide'
 import { NeedCreatedState } from '../NeedCreatedState'
+import { defaultI18n } from '../../i18n'
 
 export interface AnimatorControllerProps {
   /** 适配器实例 */
@@ -23,8 +25,9 @@ export const AnimatorController = observer<AnimatorControllerProps>(({ adapter, 
   const store = useAnimatorControllerStore(adapter)
   const { editorState, selectedEntity, editingAnimator } = store
 
-  const { uiComponents, eventBus, i18n } = adapter
-  const { Flex, styled } = uiComponents
+  const { eventBus } = adapter
+  // 直接使用本地i18n
+  const i18n = defaultI18n
   const layoutListener = useRef<(() => void) | null>(null)
   const [isReady, setIsReady] = React.useState(false)
 
@@ -106,7 +109,7 @@ export const AnimatorController = observer<AnimatorControllerProps>(({ adapter, 
   }
 
   return (
-    <StyledAnimatorControllerWrap wrap={false} className={className} style={style}>
+    <StyledAnimatorControllerWrap wrap={false} className={className} style={style} data-testid="animator-controller">
       <LeftSide adapter={adapter} store={store} />
       <RightSide adapter={adapter} store={store} />
     </StyledAnimatorControllerWrap>

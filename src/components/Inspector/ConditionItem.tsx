@@ -2,6 +2,7 @@ import React from 'react'
 import { observer } from 'mobx-react-lite'
 import type { IAnimatorControllerAdapter } from '../../types/adapter'
 import type { AnimatorControllerStore } from '../../stores/AnimatorControllerStore'
+import { defaultI18n } from '../../i18n'
 
 interface ConditionItemProps {
   adapter: IAnimatorControllerAdapter
@@ -10,7 +11,9 @@ interface ConditionItemProps {
 }
 
 export const ConditionItem = observer<ConditionItemProps>(({ adapter, store, index }) => {
-  const { uiComponents, i18n } = adapter
+  const { uiComponents } = adapter
+  // 直接使用本地i18n
+  const i18n = defaultI18n
   const { Flex, Button, Select, styled, icons } = uiComponents
   const transition = store.selectedTransition
   const { editingAnimatorController } = store

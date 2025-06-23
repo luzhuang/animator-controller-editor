@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
+import { Flex, styled } from '@galacean/editor-ui'
 
 import type { IAnimatorControllerAdapter } from '../../types/adapter'
 import type { AnimatorControllerStore } from '../../stores/AnimatorControllerStore'
@@ -10,8 +11,7 @@ interface RightSideProps {
 }
 
 export const RightSide = observer<RightSideProps>(({ adapter, store }) => {
-  const { uiComponents } = adapter
-  const { Flex, styled } = uiComponents
+  // No need for uiComponents anymore
   const containerRef = useRef<HTMLDivElement>(null)
 
   // 创建样式化组件
@@ -62,10 +62,11 @@ export const RightSide = observer<RightSideProps>(({ adapter, store }) => {
   }, [store.stateMachineGraph])
 
   return (
-    <RightSideRoot>
+    <RightSideRoot data-testid="graph-container">
       <GraphContainer>
         <div
           ref={containerRef}
+          className="x6-graph"
           style={{
             width: '100%',
             height: '100%',

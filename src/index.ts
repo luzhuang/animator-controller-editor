@@ -42,3 +42,7 @@ export { Inspector } from './components/Inspector'
 // 适配器
 export { createGalaceanEditorAdapter } from './adapters/galacean-editor'
 export type { GalaceanEditorAdapterConfig } from './adapters/galacean-editor'
+
+// 国际化
+export { createI18n, defaultI18n, translations, SUPPORTED_LANGUAGES } from './i18n'
+export type { II18nInstance, II18nResource, SupportedLanguage } from './i18n'

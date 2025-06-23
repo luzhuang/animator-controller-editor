@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite'
 import type { IAnimatorControllerAdapter } from '../../types/adapter'
 import type { AnimatorControllerStore } from '../../stores/AnimatorControllerStore'
 import { ConditionItem } from './ConditionItem'
+import { defaultI18n } from '../../i18n'
 
 interface TransitionInspectorProps {
   adapter: IAnimatorControllerAdapter
@@ -10,10 +11,12 @@ interface TransitionInspectorProps {
 }
 
 export const TransitionInspector = observer<TransitionInspectorProps>(({ adapter, store }) => {
-  const { uiComponents, i18n } = adapter
+  const { uiComponents } = adapter
+  // 直接使用本地i18n
+  const i18n = defaultI18n
   const { Button, Flex, Text, styled, icons } = uiComponents
   const transition = store.selectedTransition
-  
+
   if (!transition) {
     return null
   }
@@ -86,30 +89,20 @@ export const TransitionInspector = observer<TransitionInspectorProps>(({ adapter
           )}
         </FormGroup>
       ))}
-      
+
       {/* Conditions section */}
       <div>
         <Flex align="center" justifyContent="between">
           <SectionTitle>{i18n.t('animation.conditions')}</SectionTitle>
-          <Button
-            size="xs"
-            variant="secondary"
-            startSlot={<icons.Plus />}
-            onClick={() => store.addCondition()}
-          >
+          <Button size="xs" variant="secondary" startSlot={<icons.Plus />} onClick={() => store.addCondition()}>
             {i18n.t('animation.add-condition')}
           </Button>
         </Flex>
-        
+
         {conditions.map((_, index) => (
-          <ConditionItem 
-            key={index}
-            adapter={adapter} 
-            store={store} 
-            index={index} 
-          />
+          <ConditionItem key={index} adapter={adapter} store={store} index={index} />
         ))}
-        
+
         {conditions.length === 0 && (
           <Text size="sm" secondary css={{ textAlign: 'center', padding: 'var(--space-4)' }}>
             {i18n.t('animation.no-conditions')}

@@ -1,40 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react'
-
-// 导入真实的 editor-ui 组件
-import {
-  Button,
-  Input,
-  Select,
-  Popover,
-  Tooltip,
-  Separator,
-  Flex,
-  ActionButton,
-  DropdownMenu,
-  SegmentControl,
-  SegmentControlItem,
-  ScrollArea,
-  styled,
-  Text,
-  ThemeProvider,
-} from '@galacean/editor-ui'
-
-// 导入可用的图标 (editor-ui 中可用的图标有限)
-import { EyeDropperIcon, IconUnknownFile } from '@galacean/editor-ui'
-
-// 导入真实的 Tabler 图标
-import {
-  IconPlus,
-  IconMinus,
-  IconTrash,
-  IconSettings,
-  IconCopy,
-  IconSquareRounded,
-  IconDots,
-  IconChevronDown,
-} from '@tabler/icons-react'
-
+import React from 'react'
 import { IAnimatorControllerAdapter } from '../src'
+import { createUIComponents } from '../src/adapters/galacean-editor/ui-components'
 
 // Real animator controller data from the JSON file
 const realAnimatorController = {
@@ -436,143 +402,22 @@ export function createMockAdapter(): IAnimatorControllerAdapter {
       getRootStore: () => mockState,
       getUndoManager: () => ({}),
     },
-    uiComponents: {
-      // 使用真实的 editor-ui 组件
-      Flex,
-      Button,
-      Input,
-      Select,
-      Popover,
-      Tooltip,
-      Separator,
-      ActionButton,
-      SegmentControl,
-      SegmentControlItem,
-      ScrollArea,
-      Text,
-      DropdownMenu: Object.assign(
-        ({ children, trigger, ...props }: any) => {
-          const [isOpen, setIsOpen] = useState(false)
-
-          const handleTriggerClick = () => {
-            setIsOpen(!isOpen)
-          }
-
-          const handleDocumentClick = useCallback(
-            (e: Event) => {
-              if (isOpen) {
-                setIsOpen(false)
-              }
-            },
-            [isOpen]
-          )
-
-          useEffect(() => {
-            if (isOpen) {
-              document.addEventListener('click', handleDocumentClick)
-              return () => document.removeEventListener('click', handleDocumentClick)
-            }
-          }, [isOpen, handleDocumentClick])
-
-          return React.createElement(
-            'div',
-            {
-              style: {
-                position: 'relative',
-                display: 'inline-block',
-                ...props.style,
-              },
-              ...props,
-            },
-            [
-              React.cloneElement(trigger, {
-                key: 'trigger',
-                onClick: handleTriggerClick,
-              }),
-              isOpen &&
-                React.createElement(
-                  'div',
-                  {
-                    key: 'menu',
-                    style: {
-                      position: 'absolute',
-                      top: '100%',
-                      left: 0,
-                      background: 'white',
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                      zIndex: 1000,
-                      minWidth: '120px',
-                      padding: '4px 0',
-                    },
-                  },
-                  children
-                ),
-            ]
-          )
-        },
-        {
-          Item: ({ children, onClick, ...props }: any) => {
-            const handleClick = (e: any) => {
-              e.stopPropagation()
-              if (onClick) onClick(e)
-            }
-
-            return React.createElement(
-              'div',
-              {
-                style: {
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  borderBottom: 'none',
-                  '&:hover': {
-                    backgroundColor: '#f5f5f5',
-                  },
-                  ...props.style,
-                },
-                onClick: handleClick,
-                onMouseEnter: (e: any) => {
-                  e.target.style.backgroundColor = '#f5f5f5'
-                },
-                onMouseLeave: (e: any) => {
-                  e.target.style.backgroundColor = 'transparent'
-                },
-                ...props,
-              },
-              children
-            )
-          },
-        }
-      ),
-
-      // 图标组件 (使用真实的 Tabler 图标)
-      icons: {
-        // 真实的 Tabler 图标
-        Plus: IconPlus,
-        Minus: IconMinus,
-        Trash: IconTrash,
-        Settings: IconSettings,
-        Copy: IconCopy,
-        SquareRounded: IconSquareRounded,
-        More: IconDots,
-        ChevronDown: IconChevronDown,
-        // editor-ui 中的图标
-        EyeDropper: EyeDropperIcon,
-        UnknownFile: IconUnknownFile,
-      },
-
-      // 使用真实的 styled 函数
-      styled,
-    },
     eventBus: {
       on: () => () => {},
       emit: () => {},
       off: () => {},
     },
     i18n: {
-      t: (key: string) => key,
+      t: (key: string, params?: any[]) => {
+        // 使用简单的参数替换作为 mock
+        if (params && Array.isArray(params)) {
+          return key.replace(/\{\{(\d+)\}\}/g, (match, index) => {
+            const paramIndex = parseInt(index)
+            return params[paramIndex] !== undefined ? String(params[paramIndex]) : match
+          })
+        }
+        return key
+      },
     },
   }
 }

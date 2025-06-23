@@ -1,8 +1,11 @@
 import React from 'react'
 import { observer } from 'mobx-react-lite'
+import { Flex, Button, Text, Input, styled } from '@galacean/editor-ui'
+
 import type { IAnimatorControllerAdapter } from '../../types/adapter'
 import type { AnimatorControllerStore } from '../../stores/AnimatorControllerStore'
 import { ParameterValueType } from '../../types/animator'
+import { defaultI18n } from '../../i18n'
 
 interface ParameterItemProps {
   adapter: IAnimatorControllerAdapter
@@ -11,16 +14,17 @@ interface ParameterItemProps {
 }
 
 export const ParameterItem = observer<ParameterItemProps>(({ adapter, store, index }) => {
-  const { uiComponents, i18n } = adapter
-  const { Flex, Button, Text, Input, styled } = uiComponents
+  const {} = adapter
+  // 直接使用本地i18n
+  const i18n = defaultI18n
   const { editingAnimatorController } = store
-  
+
   if (!editingAnimatorController) {
     return null
   }
-  
+
   const parameter = editingAnimatorController.parameters[index]
-  
+
   const StyledParameterItem = styled(Flex, {
     padding: 'var(--space-2)',
     borderBottom: '1px solid var(--colors-gray6)',
@@ -88,8 +92,7 @@ export const ParameterItem = observer<ParameterItemProps>(({ adapter, store, ind
             onClick={() => {
               // Trigger parameter - could emit event
               console.log('Trigger parameter:', parameter.name)
-            }}
-          >
+            }}>
             {i18n.t('animation.trigger')}
           </Button>
         )
@@ -112,11 +115,7 @@ export const ParameterItem = observer<ParameterItemProps>(({ adapter, store, ind
             {getParameterTypeLabel(parameter.type)}
           </Text>
         </Flex>
-        <Button
-          size="xs"
-          variant="ghost"
-          onClick={handleRemove}
-        >
+        <Button size="xs" variant="ghost" onClick={handleRemove}>
           {i18n.t('common.remove')}
         </Button>
       </Flex>

@@ -2,6 +2,7 @@ import React from 'react'
 import { observer } from 'mobx-react-lite'
 import type { IAnimatorControllerAdapter } from '../../types/adapter'
 import type { AnimatorControllerStore } from '../../stores/AnimatorControllerStore'
+import { defaultI18n } from '../../i18n'
 
 interface ScriptAssetPickerProps {
   adapter: IAnimatorControllerAdapter
@@ -10,10 +11,12 @@ interface ScriptAssetPickerProps {
 }
 
 export const ScriptAssetPicker = observer<ScriptAssetPickerProps>(({ adapter, store, index }) => {
-  const { uiComponents, i18n } = adapter
+  const { uiComponents } = adapter
+  // 直接使用本地i18n
+  const i18n = defaultI18n
   const { Flex, Button, Text, styled, icons } = uiComponents
   const state = store.selectedState
-  
+
   if (!state) {
     return null
   }
@@ -49,21 +52,12 @@ export const ScriptAssetPicker = observer<ScriptAssetPickerProps>(({ adapter, st
         <Text size="xs" secondary>
           {i18n.t('animation.state-machine-script')}
         </Text>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={openScriptPicker}
-          css={{ justifyContent: 'flex-start' }}
-        >
+        <Button size="sm" variant="outline" onClick={openScriptPicker} css={{ justifyContent: 'flex-start' }}>
           {scriptId || i18n.t('animation.select-script')}
         </Button>
       </Flex>
-      
-      <Button
-        size="xs"
-        variant="ghost"
-        onClick={handleRemove}
-      >
+
+      <Button size="xs" variant="ghost" onClick={handleRemove}>
         <icons.Trash />
       </Button>
     </StyledScriptPicker>

@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@galacean/editor-ui': path.resolve(__dirname, '../editor-ui/packages/ui/src'),
+      '@galacean/gui': path.resolve(__dirname, '../editor-ui/packages/gui/src'),
     },
   },
   define: {
