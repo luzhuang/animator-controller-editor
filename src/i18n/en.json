@@ -1,0 +1,67 @@
+{
+  "animation": {
+    "weight": "Weight",
+    "trigger": "Trigger",
+    "default-value": "Default Value",
+    "select-parameter": "Select Parameter",
+    "select-script": "Select Script",
+    "state-machine-script": "State Machine Script",
+    "add-condition": "Add Condition",
+    "conditions": "Conditions",
+    "no-conditions": "No conditions",
+    "layers": "Layers",
+    "parameters": "Parameters",
+    "no-parameters": "No Parameters",
+    "select-controller": "Select an AnimatorController asset from Asset Panel to editing",
+    "condition": {
+      "if": "If",
+      "if-not": "If Not",
+      "greater": "Greater",
+      "less": "Less",
+      "equals": "Equals",
+      "not-equal": "Not Equal"
+    },
+    "parameter": {
+      "name": "Parameter Name",
+      "boolean": "Boolean",
+      "number": "Number",
+      "string": "String",
+      "trigger": "Trigger"
+    },
+    "clip": {
+      "an-clip": "an AnimationClip",
+      "tip-0": "To begin animating {{0}} , add {{1}} to the Animator",
+      "tip-1": "To begin animating {{0}} , create an AnimatorController",
+      "tip-2": "To begin animating {{0}} , ",
+      "tip-3": "create an Animator and add {{0}}",
+      "tip-4": "create an Animator",
+      "create": "Create",
+      "create-animator-controller": "Create AnimatorController",
+      "add-target": "Add "
+    },
+    "animator-controller": {
+      "state": {
+        "name": "Name",
+        "clip": "Animation Clip",
+        "speed": "Speed",
+        "validation": {
+          "must-be-unique": "State name must be unique"
+        }
+      },
+      "transition": {
+        "solo": "Solo",
+        "mute": "Mute",
+        "has-exit-time": "Has Exit Time",
+        "fixed-duration": "Fixed Duration",
+        "duration": "Duration"
+      }
+    }
+  },
+  "common": {
+    "remove": "Remove",
+    "select": "Select"
+  },
+  "inspector": {
+    "add-statemachine-script": "Add StateMachine Script"
+  }
+}

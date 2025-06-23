@@ -1,0 +1,67 @@
+{
+  "animation": {
+    "weight": "重み",
+    "trigger": "トリガー",
+    "default-value": "デフォルト値",
+    "select-parameter": "パラメータを選択",
+    "select-script": "スクリプトを選択",
+    "state-machine-script": "ステートマシンスクリプト",
+    "add-condition": "条件を追加",
+    "conditions": "条件",
+    "no-conditions": "条件なし",
+    "layers": "レイヤー",
+    "parameters": "パラメータ",
+    "no-parameters": "パラメータなし",
+    "select-controller": "アセットパネルからアニメーターコントローラーアセットを選択して編集",
+    "condition": {
+      "if": "もし",
+      "if-not": "もしでない",
+      "greater": "より大きい",
+      "less": "より小さい",
+      "equals": "等しい",
+      "not-equal": "等しくない"
+    },
+    "parameter": {
+      "name": "パラメータ名",
+      "boolean": "ブール値",
+      "number": "数値",
+      "string": "文字列",
+      "trigger": "トリガー"
+    },
+    "clip": {
+      "an-clip": "アニメーションクリップ",
+      "tip-0": "{{0}} のアニメーションを開始するには、{{1}} をアニメーターに追加してください",
+      "tip-1": "{{0}} のアニメーションを開始するには、アニメーターコントローラーを作成してください",
+      "tip-2": "{{0}} のアニメーションを開始するには、",
+      "tip-3": "アニメーターを作成して {{0}} を追加してください",
+      "tip-4": "アニメーターを作成してください",
+      "create": "作成",
+      "create-animator-controller": "アニメーターコントローラーを作成",
+      "add-target": "追加 "
+    },
+    "animator-controller": {
+      "state": {
+        "name": "名前",
+        "clip": "アニメーションクリップ",
+        "speed": "速度",
+        "validation": {
+          "must-be-unique": "ステート名は一意である必要があります"
+        }
+      },
+      "transition": {
+        "solo": "ソロ",
+        "mute": "ミュート",
+        "has-exit-time": "終了時間あり",
+        "fixed-duration": "固定持続時間",
+        "duration": "持続時間"
+      }
+    }
+  },
+  "common": {
+    "remove": "削除",
+    "select": "選択"
+  },
+  "inspector": {
+    "add-statemachine-script": "ステートマシンスクリプトを追加"
+  }
+}

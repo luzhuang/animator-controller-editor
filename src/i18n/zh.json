@@ -1,0 +1,67 @@
+{
+  "animation": {
+    "weight": "权重",
+    "trigger": "触发器",
+    "default-value": "默认值",
+    "select-parameter": "选择参数",
+    "select-script": "选择脚本",
+    "state-machine-script": "状态机脚本",
+    "add-condition": "添加条件",
+    "conditions": "条件",
+    "no-conditions": "无条件",
+    "layers": "图层",
+    "parameters": "参数",
+    "no-parameters": "无参数",
+    "select-controller": "从资产面板选择一个动画控制器资产进行编辑",
+    "condition": {
+      "if": "如果",
+      "if-not": "如果不",
+      "greater": "大于",
+      "less": "小于",
+      "equals": "等于",
+      "not-equal": "不等于"
+    },
+    "parameter": {
+      "name": "参数名称",
+      "boolean": "布尔值",
+      "number": "数字",
+      "string": "字符串",
+      "trigger": "触发器"
+    },
+    "clip": {
+      "an-clip": "一个动画片段",
+      "tip-0": "要开始为 {{0}} 制作动画，请将 {{1}} 添加到动画器",
+      "tip-1": "要开始为 {{0}} 制作动画，请创建一个动画控制器",
+      "tip-2": "要开始为 {{0}} 制作动画，",
+      "tip-3": "创建一个动画器并添加 {{0}}",
+      "tip-4": "创建一个动画器",
+      "create": "创建",
+      "create-animator-controller": "创建动画控制器",
+      "add-target": "添加 "
+    },
+    "animator-controller": {
+      "state": {
+        "name": "名称",
+        "clip": "动画片段",
+        "speed": "速度",
+        "validation": {
+          "must-be-unique": "状态名称必须唯一"
+        }
+      },
+      "transition": {
+        "solo": "独奏",
+        "mute": "静音",
+        "has-exit-time": "有退出时间",
+        "fixed-duration": "固定持续时间",
+        "duration": "持续时间"
+      }
+    }
+  },
+  "common": {
+    "remove": "移除",
+    "select": "选择"
+  },
+  "inspector": {
+    "add-statemachine-script": "添加状态机脚本"
+  }
+}
