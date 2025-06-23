@@ -14,7 +14,7 @@ export const ConditionItem = observer<ConditionItemProps>(({ adapter, store, ind
   const { Flex, Button, Select, styled, icons } = uiComponents
   const transition = store.selectedTransition
   const { editingAnimatorController } = store
-  
+
   if (!transition || !editingAnimatorController) {
     return null
   }
@@ -64,20 +64,18 @@ export const ConditionItem = observer<ConditionItemProps>(({ adapter, store, ind
       <Select
         value={condition.parameterId}
         onValueChange={handleParameterChange}
-        placeholder={i18n.t('animation.select-parameter')}
-      >
-        {editingAnimatorController.parameters.map((param) => (
-          <Select.Item key={param.name} value={param.name}>
-            {param.name}
-          </Select.Item>
-        ))}
+        placeholder={i18n.t('animation.select-parameter')}>
+        {editingAnimatorController.parameters
+          ?.filter((param) => param?.name)
+          .map((param) => (
+            <Select.Item key={param.name} value={param.name}>
+              {param.name}
+            </Select.Item>
+          ))}
       </Select>
 
       {/* Condition mode selector */}
-      <Select
-        value={condition.mode}
-        onValueChange={handleModeChange}
-      >
+      <Select value={condition.mode} onValueChange={handleModeChange}>
         {conditionModes.map((mode) => (
           <Select.Item key={mode.value} value={mode.value}>
             {mode.label}
@@ -86,7 +84,10 @@ export const ConditionItem = observer<ConditionItemProps>(({ adapter, store, ind
       </Select>
 
       {/* Threshold input (only for numeric conditions) */}
-      {(condition.mode === 'Greater' || condition.mode === 'Less' || condition.mode === 'Equals' || condition.mode === 'NotEqual') && (
+      {(condition.mode === 'Greater' ||
+        condition.mode === 'Less' ||
+        condition.mode === 'Equals' ||
+        condition.mode === 'NotEqual') && (
         <input
           type="number"
           value={condition.threshold || 0}
@@ -102,11 +103,7 @@ export const ConditionItem = observer<ConditionItemProps>(({ adapter, store, ind
       )}
 
       {/* Remove button */}
-      <Button
-        size="xs"
-        variant="ghost"
-        onClick={handleRemove}
-      >
+      <Button size="xs" variant="ghost" onClick={handleRemove}>
         <icons.Trash />
       </Button>
     </StyledConditionItem>

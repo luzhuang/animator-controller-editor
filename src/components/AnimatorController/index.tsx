@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
+
 import type { IAnimatorControllerAdapter } from '../../types/adapter'
 import { AnimatorControllerEditorState } from '../../types/animator'
 import { useAnimatorControllerStore } from '../../hooks/useAnimatorControllerStore'
@@ -10,25 +11,17 @@ import { NeedCreatedState } from '../NeedCreatedState'
 export interface AnimatorControllerProps {
   /** 适配器实例 */
   adapter: IAnimatorControllerAdapter
-  
+
   /** 额外的样式类名 */
   className?: string
-  
+
   /** 额外的样式 */
   style?: React.CSSProperties
 }
 
-export const AnimatorController = observer<AnimatorControllerProps>(({ 
-  adapter, 
-  className, 
-  style 
-}) => {
+export const AnimatorController = observer<AnimatorControllerProps>(({ adapter, className, style }) => {
   const store = useAnimatorControllerStore(adapter)
-  const { 
-    editorState, 
-    selectedEntity,
-    editingAnimator 
-  } = store
+  const { editorState, selectedEntity, editingAnimator } = store
 
   const { uiComponents, eventBus, i18n } = adapter
   const { Flex, styled } = uiComponents
@@ -42,7 +35,7 @@ export const AnimatorController = observer<AnimatorControllerProps>(({
     opacity: isReady ? 1 : 0,
     display: 'flex',
     flexDirection: 'row',
-    overflow: 'hidden'
+    overflow: 'hidden',
   })
 
   const StyledContent = styled('div', {
@@ -75,31 +68,20 @@ export const AnimatorController = observer<AnimatorControllerProps>(({
     })
 
     layoutListener.current = unsubscribe
-    
+
     // 延迟渲染，确保容器有尺寸
-    requestAnimationFrame(() => {
+    const timer = setTimeout(() => {
       setIsReady(true)
-    })
+    }, 100) // 给更多时间确保 DOM 完全准备好
 
     return () => {
+      clearTimeout(timer)
       if (layoutListener.current) {
         layoutListener.current()
       }
       store.setVisibility(false)
     }
   }, [store, eventBus])
-
-  useEffect(() => {
-    return () => {
-      store.setVisibility(false)
-    }
-  }, [store])
-
-  // 加载中或不可见状态
-  if (editorState === AnimatorControllerEditorState.Loading || 
-      editorState === AnimatorControllerEditorState.NoVisible) {
-    return null
-  }
 
   // 没有编辑中的AnimatorController
   if (!store.editingAnimatorController) {
@@ -120,22 +102,13 @@ export const AnimatorController = observer<AnimatorControllerProps>(({
         />
       )
     }
-    return (
-      <StyledContent>
-        {i18n.t('animation.select-controller')}
-      </StyledContent>
-    )
+    return <StyledContent>{i18n.t('animation.select-controller')}</StyledContent>
   }
 
   return (
-    <StyledAnimatorControllerWrap 
-      wrap={false} 
-      className={className}
-      style={style}
-    >
-      {store.editingAnimatorController?.isSubAsset && <ReadOnlyMask />}
+    <StyledAnimatorControllerWrap wrap={false} className={className} style={style}>
       <LeftSide adapter={adapter} store={store} />
-      {isReady && <RightSide adapter={adapter} store={store} />}
+      <RightSide adapter={adapter} store={store} />
     </StyledAnimatorControllerWrap>
   )
 })

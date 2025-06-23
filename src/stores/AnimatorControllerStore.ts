@@ -1,7 +1,7 @@
 import { debounce } from 'es-toolkit'
 import { action, autorun, computed, makeObservable, observable, reaction, toJS } from 'mobx'
 import { v4 as uuidv4 } from 'uuid'
-import type { 
+import type {
   AnimatorControllerItem,
   AnimatorControllerEditorState,
   ContextMenuInfo,
@@ -13,7 +13,7 @@ import type {
   IStateMachineData,
   IStateData,
   ITransitionData,
-  StateType
+  StateType,
 } from '../types/animator'
 import { AnimatorControllerEditorState as EditorState } from '../types/animator'
 import type { IAnimatorControllerAdapter } from '../types/adapter'
@@ -51,8 +51,6 @@ export class AnimatorControllerStore {
 
   private _editingAnimatorControllerId: string | null = null
 
-  private _editingAnimatorController: IAnimatorControllerAsset | null = null
-
   private _selectAssetDisposer: (() => void) | null = null
   private _animatorControllerListenerDisposer: (() => void) | null = null
   private _selectEntityDisposer: (() => void) | null = null
@@ -72,11 +70,11 @@ export class AnimatorControllerStore {
       _editorState: observable,
       _currentLayerIndex: observable,
       _editingAnimatorControllerId: observable,
-      _editingAnimatorController: observable,
       editorState: computed,
       selectedEntity: computed,
       selectedState: computed,
       selectedTransition: computed,
+      editingAnimatorController: computed,
       currentLayerIndex: computed,
       setVisibility: action,
       updateEditorState: action,
@@ -103,11 +101,11 @@ export class AnimatorControllerStore {
       updateGlobalPlayState: action,
       _updateContextMenuInfo: action,
     } as any)
-    
+
     this.updateStateMachineData = debounce(this._updateStateMachineDataImmediately.bind(this), 1000, {
       edges: ['trailing'],
     })
-    
+
     this.stateMachineGraph = new AnimatorStateMachineGraph()
     this.stateMachineGraph.onStateClick = this.selectState.bind(this)
     this.stateMachineGraph.onStateMove = this._handleStateMove.bind(this)
@@ -138,7 +136,15 @@ export class AnimatorControllerStore {
   }
 
   get editingAnimatorController(): IAnimatorControllerAsset | null {
-    return this._editingAnimatorController
+    if (!this._editingAnimatorControllerId) {
+      return null
+    }
+
+    // 从 asset store 中获取当前 controller
+    const rootState = this.adapter.stateManager.getState()
+    const controller = rootState?.assetStore?.assets?.[this._editingAnimatorControllerId]
+
+    return controller || null
   }
 
   set editingAnimatorControllerId(id: string | null) {
@@ -153,7 +159,7 @@ export class AnimatorControllerStore {
 
     this._editingAnimatorControllerId = id
     console.log('✅ ID set to:', this._editingAnimatorControllerId)
-    
+
     if (id) {
       // Select asset through adapter
       const rootState = this.adapter.stateManager.getState()
@@ -161,12 +167,12 @@ export class AnimatorControllerStore {
 
       // 不要在setter中立即获取controller，让它通过响应式系统自然更新
       this.currentLayerIndex = 0
-      
+
       // 异步执行applyControllerData以确保状态已经更新
       setTimeout(() => {
         console.log('⏰ Timeout callback executing...')
         console.log('⏰ Current ID in timeout:', this._editingAnimatorControllerId)
-        
+
         // 直接从state manager获取，绕过computed
         const rootState = this.adapter.stateManager.getState()
         console.log('⏰ Direct state check - assets:', Object.keys(rootState?.assetStore?.assets || {}))
@@ -179,19 +185,18 @@ export class AnimatorControllerStore {
         } else {
           console.log('⏰ Controller not found. Available assets:', rootState?.assetStore?.assets)
         }
-        
+
         const editingAnimatorController = this.editingAnimatorController
         console.log('🎯 Retrieved controller after timeout:', !!editingAnimatorController)
         console.log('🎯 Direct controller vs computed:', !!directController, 'vs', !!editingAnimatorController)
         console.log('🎯 _editingAnimatorControllerId:', this._editingAnimatorControllerId)
         editingAnimatorController?.applyControllerData()
-        
+
         // 强制更新状态来触发React重新渲染
         this.updateEditorState(EditorState.Editable)
-        
-        // 设置controller引用
-        this._editingAnimatorController = directController
-        
+
+        // controller 现在通过 computed 属性自动获取
+
         // 强制重新初始化状态机图表
         if (directController) {
           console.log('🔄 Force updating state machine graph')
@@ -217,7 +222,7 @@ export class AnimatorControllerStore {
     if (visibility) {
       this.updateEditorState(EditorState.Visible)
       this.checkAnimatorControllerAsset()
-      
+
       this._selectEntityDisposer?.()
       this._selectEntityDisposer = autorun(() => {
         const rootState = this.adapter.stateManager.getState()
@@ -359,7 +364,7 @@ export class AnimatorControllerStore {
           type: 'Number',
           dragStep: 0.1,
         },
-      ]
+      ],
     }
   }
 
@@ -394,7 +399,7 @@ export class AnimatorControllerStore {
           type: 'Number',
           min: 0,
         },
-      ]
+      ],
     }
   }
 
@@ -404,7 +409,8 @@ export class AnimatorControllerStore {
     this.currentSelectType = 0 // AnimatorControllerItem.Null
   }
 
-  addState(name?: string, id?: string, type: StateType = 0): State { // StateType.Normal
+  addState(name?: string, id?: string, type: StateType = 0): State {
+    // StateType.Normal
     if (!name) {
       name = this._makeUniqueStateName('New State')
     }
@@ -462,12 +468,23 @@ export class AnimatorControllerStore {
       id = uuidv4()
     }
     const { statesMap } = this
-    const transition = new Transition(
-      this.stateMachineGraph,
-      id,
-      statesMap[sourceStateId],
-      statesMap[destinationStateId]
-    )
+
+    // Check if source and destination states exist
+    const sourceState = statesMap[sourceStateId]
+    const destinationState = statesMap[destinationStateId]
+
+    if (!sourceState) {
+      console.error(`❌ Cannot create transition ${id}: source state '${sourceStateId}' not found`)
+      throw new Error(`Source state '${sourceStateId}' not found`)
+    }
+
+    if (!destinationState) {
+      console.error(`❌ Cannot create transition ${id}: destination state '${destinationStateId}' not found`)
+      throw new Error(`Destination state '${destinationStateId}' not found`)
+    }
+
+    console.log(`✅ Creating transition ${id}: ${sourceStateId} -> ${destinationStateId}`)
+    const transition = new Transition(this.stateMachineGraph, id, sourceState, destinationState)
     this.transitions.push(transition)
     this.transitionsMap[transition.id] = transition
     this.stateMachineGraph.addTransition(transition)
@@ -503,7 +520,7 @@ export class AnimatorControllerStore {
 
   checkAnimatorControllerAsset() {
     console.log('🔍 checkAnimatorControllerAsset called, current editingId:', this.editingAnimatorControllerId)
-    
+
     if (this.editingAnimatorControllerId) {
       console.log('✅ Already has editingAnimatorControllerId, skipping')
       return
@@ -552,7 +569,7 @@ export class AnimatorControllerStore {
   addLayer() {
     const editingAnimatorController = this.editingAnimatorController
     if (!editingAnimatorController) return
-    
+
     editingAnimatorController.layers.push({
       name: 'Layer',
       blendingMode: 0, // AnimatorLayerBlendingMode.Override
@@ -564,7 +581,7 @@ export class AnimatorControllerStore {
   removeLayer(index: number) {
     const editingAnimatorController = this.editingAnimatorController
     if (!editingAnimatorController) return
-    
+
     editingAnimatorController.layers.splice(index, 1)
     this.currentLayerIndex = 0
     this.updateStateMachineData()
@@ -646,13 +663,13 @@ export class AnimatorControllerStore {
           this._initStates()
         }
         this._updateStateMachineDataImmediately()
-        
+
         // 强制设置编辑器状态为可编辑
         this.updateEditorState(EditorState.Editable)
       }
       return
     }
-    
+
     const { internalDataUpdated } = editingAnimatorController
     console.log('🔄 internalDataUpdated:', internalDataUpdated)
     if (internalDataUpdated) {
@@ -697,7 +714,7 @@ export class AnimatorControllerStore {
     const entryTransitions: ITransitionData[] = []
     const anyTransitions: ITransitionData[] = []
     const transitions: ITransitionData[] = []
-    
+
     this.transitions.forEach((transition) => {
       if (transition.sourceState.isEntryState) {
         entryTransitions.push(transition.data)
@@ -722,7 +739,7 @@ export class AnimatorControllerStore {
     data = toJS(data)
     const { cells } = data
     const transitions: any[] = []
-    
+
     cells.forEach((cell: any) => {
       const shape = cell.shape
       if (shape === 'state' || shape === 'internalState') {
@@ -753,14 +770,19 @@ export class AnimatorControllerStore {
     transitions.forEach((transition) => {
       transitionMap[transition.id] = transition
     })
-    
+
+    // First, create all states
     states.forEach((stateData: IStateData, index: number) => {
-      const { id, name, transitions: transitionIds } = stateData
+      const { id, name } = stateData
       const newState = this.addState(name, id!)
       newState.data = stateData
       newState.x += index * 24
       newState.y += index * 24
+    })
 
+    // Then, create all transitions after all states exist
+    states.forEach((stateData: IStateData) => {
+      const { id, transitions: transitionIds } = stateData
       transitionIds.forEach((transitionId) => {
         const transitionData = transitionMap[transitionId]
         if (transitionData) {
@@ -769,12 +791,12 @@ export class AnimatorControllerStore {
         }
       })
     })
-    
+
     entryTransitions.forEach((transitionData) => {
       const transition = this.addTransition(transitionData.id, 'entry', transitionData.destinationStateId)
       transition.data = transitionData
     })
-    
+
     anyTransitions.forEach((transitionData) => {
       const transition = this.addTransition(transitionData.id, 'any', transitionData.destinationStateId)
       transition.data = transitionData

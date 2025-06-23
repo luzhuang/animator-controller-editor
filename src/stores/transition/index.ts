@@ -20,8 +20,8 @@ export class Transition {
 
   get data(): ITransitionData {
     this._data.id = this.id
-    this._data.sourceStateId = this.sourceState.id
-    this._data.destinationStateId = this.targetState.id
+    this._data.sourceStateId = this.sourceState?.id || ''
+    this._data.destinationStateId = this.targetState?.id || ''
     return this._data
   }
 
@@ -59,14 +59,14 @@ export class Transition {
       _targetState._inTransitions[id] = this
     }
 
-    if (_sourceState.name === 'entry') {
+    if (_sourceState?.name === 'entry') {
       this._data.duration = 0
     }
 
-    if (_sourceState.name === 'entry' || _sourceState.name === 'any' || _targetState.name === 'exit') {
+    if (_sourceState?.name === 'entry' || _sourceState?.name === 'any' || _targetState?.name === 'exit') {
       this._data.hasExitTime = false
     }
-    
+
     makeObservable(this, {
       _data: observable,
       data: computed,

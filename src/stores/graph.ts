@@ -1,9 +1,11 @@
 import { Edge, Graph, Node } from '@antv/x6'
 import { Selection } from '@antv/x6-plugin-selection'
+
+import type { State } from './state'
+
 import type { ContextMenuInfo, ITransitionData } from '../types/animator'
 import { StateType } from '../types/animator'
-import type { State } from './state'
-import type { Transition } from './transition'
+import { StateType } from '../types/animator'
 import './x6-nodes' // 导入X6节点注册
 
 export class AnimatorStateMachineGraph {
@@ -29,7 +31,7 @@ export class AnimatorStateMachineGraph {
     this._container.style.height = '100%'
     this._container.style.position = 'relative'
     console.log('🎨 AnimatorStateMachineGraph initializing with X6...')
-    
+
     this._graph = new Graph({
       grid: 1,
       container: this._container,
@@ -74,10 +76,9 @@ export class AnimatorStateMachineGraph {
         },
         validateConnection: ({ sourceView, targetView, sourceMagnet, targetMagnet }) => {
           if (!sourceView || !targetView) return false
-          
-          const targetIds = sourceView.cell.data?.transitions?.map(
-            (transition: ITransitionData) => transition.destinationStateId
-          ) || []
+
+          const targetIds =
+            sourceView.cell.data?.transitions?.map((transition: ITransitionData) => transition.destinationStateId) || []
           // 不能重复连接
           if (targetIds.includes(targetView.cell.id)) {
             return false
@@ -129,10 +130,10 @@ export class AnimatorStateMachineGraph {
     console.log(`➕ Adding X6 state node: ${state.name} (${state.id})`)
     const { _graph: graph } = this
     if (!graph) return
-    
+
     let ports: { id: string; group: string }[]
     let shape: 'internalState' | 'state'
-    
+
     switch (state.stateType) {
       case StateType.Entry:
         shape = 'internalState'
@@ -175,7 +176,7 @@ export class AnimatorStateMachineGraph {
         ]
         break
     }
-    
+
     const cell = graph.addNode({
       id: state.id,
       position: { x: state.x, y: state.y },
@@ -195,7 +196,7 @@ export class AnimatorStateMachineGraph {
     console.log(`➕ Adding X6 transition edge: ${transition.id}`)
     const { _graph: graph } = this
     if (!graph) return
-    
+
     const { sourceState, targetState } = transition
     const edge = graph.addEdge({
       id: transition.id,
@@ -250,7 +251,7 @@ export class AnimatorStateMachineGraph {
     console.log('🗑️ Deleting selected X6 cells')
     const { _graph: graph } = this
     if (!graph) return
-    
+
     // 使用 Selection 插件的方法获取选中的元素
     const selectedCells = (graph as any).getSelectedCells ? (graph as any).getSelectedCells() : []
     if (selectedCells.length) {
@@ -274,7 +275,7 @@ export class AnimatorStateMachineGraph {
   exportGraphData() {
     const { _graph: graph } = this
     if (!graph) return null
-    
+
     return graph.toJSON()
   }
 
@@ -290,19 +291,29 @@ export class AnimatorStateMachineGraph {
       containerParent: this._container.parentElement,
       containerChildren: this._container.children.length,
       graphContainer: graph.container,
-      graphContainerChildren: graph.container?.children.length
+      graphContainerChildren: graph.container?.children.length,
     })
-    
 
-
+    // 清空容器内容，然后添加 X6 容器
+    root.innerHTML = ''
     root.appendChild(this._container)
+
     if (this._resizeObserver) {
       this._resizeObserver.disconnect()
     }
     this._resizeObserver = new ResizeObserver(() => {
+      console.log('📏 ResizeObserver triggered, resizing X6 graph')
       this._resizeGraph()
     })
-    this._resizeObserver.observe(this._container.parentElement)
+
+    // 观察父容器而不是容器本身
+    this._resizeObserver.observe(root)
+
+    // 立即触发一次 resize 以确保尺寸正确
+    setTimeout(() => {
+      console.log('🔄 Initial resize for X6 graph')
+      this._resizeGraph()
+    }, 0)
   }
 
   syncNodeData(state: State) {
@@ -331,13 +342,13 @@ export class AnimatorStateMachineGraph {
   graphPointToOffsetPoint(graphPoint: { x: number; y: number }) {
     const { _graph: graph } = this
     if (!graph) return graphPoint
-    
+
     const containerRect = this._container.getBoundingClientRect()
     const graphRect = graph.container.getBoundingClientRect()
-    
+
     const scale = graph.transform.getScale()
     const translate = graph.transform.getTranslation()
-    
+
     return {
       x: (graphPoint.x - translate.tx) / scale.sx + (graphRect.left - containerRect.left),
       y: (graphPoint.y - translate.ty) / scale.sy + (graphRect.top - containerRect.top),
@@ -347,9 +358,9 @@ export class AnimatorStateMachineGraph {
   private _bindEvents() {
     const { _graph: graph } = this
     if (!graph) return
-    
+
     console.log('🔗 Binding X6 graph events')
-    
+
     graph.on('node:click', this._onNodeClick)
     graph.on('edge:click', this._onEdgeClick)
     graph.on('blank:click', this._cancelSelected)
@@ -359,15 +370,35 @@ export class AnimatorStateMachineGraph {
     graph.on('edge:connected', this._onEdgeConnected)
     graph.on('edge:mouseup', this._onEdgeMouseUp)
     graph.on('edge:removed', this._onEdgeRemoved)
-    
+
     console.log('✅ X6 graph events bound')
   }
 
   private _resizeGraph() {
     const { _graph: graph } = this
     if (!graph) return
-    
-    graph.resize()
+
+    // 获取父容器的尺寸
+    const parent = this._container.parentElement
+    if (!parent) {
+      console.log('⚠️ No parent element for X6 container')
+      return
+    }
+
+    const parentRect = parent.getBoundingClientRect()
+    const width = parent.offsetWidth || parentRect.width
+    const height = parent.offsetHeight || parentRect.height
+
+    console.log('📏 Resizing X6 graph to:', { width, height })
+
+    // 设置容器样式确保有尺寸
+    this._container.style.width = `${width}px`
+    this._container.style.height = `${height}px`
+
+    // 调用 X6 的 resize 方法，传递明确的尺寸
+    graph.resize(width, height)
+
+    console.log('✅ X6 graph resized successfully')
   }
 
   private _deleteNodes = (nodes: Node[]) => {
@@ -433,7 +464,7 @@ export class AnimatorStateMachineGraph {
     const { edge } = args
     const sourceId = edge.getSourceCellId()
     const targetId = edge.getTargetCellId()
-    
+
     if (sourceId && targetId) {
       console.log(`🔗 Creating transition: ${sourceId} -> ${targetId}`)
       this.onAddTransition(edge.id, sourceId, targetId)
